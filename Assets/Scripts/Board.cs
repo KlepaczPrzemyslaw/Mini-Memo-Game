@@ -13,13 +13,15 @@ public class Board : MonoBehaviour
 	public Sprite[] TileImages;
 	public Vector2 TilesOffset = Vector2.one;
 	public int TileRows = 4;
-	public int TileColumns = 6;
+	public int TileColumns = 8;
 	public bool CanMove = false;
+	public TextMesh WinText;
 
 	//// Unity ////
 
 	IEnumerator Start()
 	{
+		WinText.GetComponent<Renderer>().enabled = false;
 		InstantiateBoard();
 		ShuffleTailes();
 		PlateTiles();
@@ -29,11 +31,6 @@ public class Board : MonoBehaviour
 
 		HideTailes();
 		CanMove = true;
-	}
-
-	void Update()
-	{
-
 	}
 
 	//// Private ////
@@ -67,13 +64,13 @@ public class Board : MonoBehaviour
 
 		for (int i = 0; i < tilesCount; i++)
 		{
-			_tiles[i] = CreateTile(TileImages[i/2]);
+			_tiles[i] = CreateTile(TileImages[i / 2]);
 		}
 	}
 
 	private void ShuffleTailes()
 	{
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < 2000; i++)
 		{
 			int index1 = Random.Range(0, _tiles.Length);
 			int index2 = Random.Range(0, _tiles.Length);
@@ -89,5 +86,53 @@ public class Board : MonoBehaviour
 	private void HideTailes()
 	{
 		_tiles.ToList().ForEach(tile => tile.IsActive = false);
+	}
+
+	private bool CheckIfEnd()
+	{
+		return _tiles.All(tile => tile.IsOnBoard == false);
+	}
+
+	private IEnumerator CheckPairCorutine()
+	{
+		var tilesUncovered = _tiles
+			.Where(tile => tile.IsOnBoard)
+			.Where(tile => tile.IsActive)
+			.ToArray();
+
+		if (tilesUncovered.Length != 2)
+			yield break;
+
+		var tile1 = tilesUncovered[0];
+		var tile2 = tilesUncovered[1];
+
+		CanMove = false;
+		yield return new WaitForSeconds(1f);
+		CanMove = true;
+
+		if (tile1.FrontRune == tile2.FrontRune)
+		{
+			tile1.IsOnBoard = false;
+			tile2.IsOnBoard = false;
+		}
+		else
+		{
+			tile1.IsActive = false;
+			tile2.IsActive = false;
+		}
+
+		if (CheckIfEnd() == false) yield break;
+
+		CanMove = false;
+		WinText.GetComponent<Renderer>().enabled = true;
+		yield return new WaitForSeconds(5f);
+		Application.Quit();
+	}
+
+	//// Public ////
+
+	public void CheckPair()
+	{
+		StartCoroutine(CheckPairCorutine());
 	}
 }

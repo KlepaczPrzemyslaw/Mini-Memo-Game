@@ -2,7 +2,8 @@
 
 public class Tile : MonoBehaviour
 {
-	public bool IsActive = false;
+	public bool IsActive = true;
+	public bool IsOnBoard = true;
 	public Sprite FrontRune;
 
 	void Start()
@@ -16,6 +17,9 @@ public class Tile : MonoBehaviour
 	void Update()
 	{
 		transform.rotation = Quaternion.Lerp(transform.rotation, GetTargetRotation(), Time.deltaTime * 5f);
+
+		if (IsOnBoard == false)
+			Destroy(gameObject);
 	}
 
 	Quaternion GetTargetRotation()
@@ -25,9 +29,14 @@ public class Tile : MonoBehaviour
 
 	private void OnMouseDown()
 	{
-		if (FindObjectOfType<Board>().CanMove == false)
+		var board = FindObjectOfType<Board>();
+		if (board.CanMove == false)
+			return;
+
+		if (IsActive == true)
 			return;
 
 		IsActive = !IsActive;
+		board.CheckPair();
 	}
 }
