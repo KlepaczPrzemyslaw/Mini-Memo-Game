@@ -2,9 +2,13 @@
 
 public class Tile : MonoBehaviour
 {
+	//// Variables ////
+
 	public bool IsActive = true;
 	public bool IsOnBoard = true;
 	public Sprite FrontRune;
+
+	//// Unity ////
 
 	void Start()
 	{
@@ -22,10 +26,14 @@ public class Tile : MonoBehaviour
 			Destroy(gameObject);
 	}
 
+	//// Private ////
+
 	Quaternion GetTargetRotation()
 	{
 		return Quaternion.Euler(IsActive ? Vector3.zero : Vector3.up * 180f);
 	}
+
+	//// Events ////
 
 	private void OnMouseDown()
 	{
